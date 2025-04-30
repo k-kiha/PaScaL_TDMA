@@ -96,8 +96,8 @@ program main
             rrrdist_c2z(2,i) = sum(rrrcount_c2z(2,0:i)) - rrrcount_c2z(2,i)
         end do
 
-        ssscount_z2c(:) = rrrcount_c2z(:)
-        rrrcount_z2c(:) = ssscount_c2z(:)
+        ssscount_z2c(:,:) = rrrcount_c2z(:,:)
+        rrrcount_z2c(:,:) = ssscount_c2z(:,:)
 
         do i = 0, nprocs-1
             sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
