@@ -12,10 +12,13 @@ program main
     integer :: mpiutil_para
     real*8 :: timeA,timeB
 
-    integer :: i, j, k
+    integer :: i, j, k, index, count
     integer :: indx_tmpa, indx_tmpb
 
     type(ptdma_plan_many) :: pz_many
+
+    integer, allocatable, dimension(:,:) :: ssscount_c2z, rrrcount_c2z, sssdist_c2z, rrrdist_c2z
+    integer, allocatable, dimension(:,:) :: ssscount_z2c, rrrcount_z2c, sssdist_z2c, rrrdist_z2c
 
     integer, allocatable, dimension(:) :: sendcount_c2z, recvcount_c2z, senddist_c2z, recvdist_c2z
     integer, allocatable, dimension(:) :: sendcount_z2c, recvcount_z2c, senddist_z2c, recvdist_z2c
@@ -70,21 +73,37 @@ program main
         allocate(a(1:n12ssub,1:n3sub), b(1:n12ssub,1:n3sub))
         allocate(c(1:n12ssub,1:n3sub), d(1:n12ssub,1:n3sub))
 
+        allocate(ssscount_c2z(1:2,0:nprocs-1), rrrcount_c2z(1:2,0:nprocs-1))
+        allocate(ssscount_z2c(1:2,0:nprocs-1), rrrcount_z2c(1:2,0:nprocs-1))
+        allocate(sssdist_c2z(1:2,0:nprocs-1), rrrdist_c2z(1:2,0:nprocs-1))
+        allocate(sssdist_z2c(1:2,0:nprocs-1), rrrdist_z2c(1:2,0:nprocs-1))
         allocate(sendcount_c2z(0:nprocs-1), recvcount_c2z(0:nprocs-1))
         allocate(sendcount_z2c(0:nprocs-1), recvcount_z2c(0:nprocs-1))
         allocate(senddist_c2z(0:nprocs-1), recvdist_c2z(0:nprocs-1))
         allocate(senddist_z2c(0:nprocs-1), recvdist_z2c(0:nprocs-1))
 
         do i = 0, nprocs-1
-            sendcount_c2z(i) = mpiutil_para(1, (n1sub*n2sub), i, nprocs, indx_tmpa, indx_tmpb)
-            recvcount_c2z(i) = mpiutil_para(1, n3           , i, nprocs, indx_tmpa, indx_tmpb)
+            ssscount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), i     , nprocs, indx_tmpa, indx_tmpb)
+            ssscount_c2z(2,i) = n3sub
+            rrrcount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), myrank, nprocs, indx_tmpa, indx_tmpb)
+            rrrcount_c2z(2,i) = mpiutil_para(1, n3           , i     , nprocs, indx_tmpa, indx_tmpb)
         end do
-        recvcount_c2z(:) = recvcount_c2z(:)*sendcount_c2z(myrank)
-        sendcount_c2z(:) = sendcount_c2z(:)*n3sub
 
         do i = 0, nprocs-1
-            senddist_c2z(i) = sum(recvcount_c2z(0:i)) - recvcount_c2z(i)
-            recvdist_c2z(i) = sum(sendcount_c2z(0:i)) - sendcount_c2z(i)
+            sssdist_c2z(1,i) = sum(ssscount_c2z(1,0:i)) - ssscount_c2z(1,i)
+            sssdist_c2z(2,i) = sum(ssscount_c2z(2,0:i)) - ssscount_c2z(2,i)
+            rrrdist_c2z(1,i) = sum(rrrcount_c2z(1,0:i)) - rrrcount_c2z(1,i)
+            rrrdist_c2z(2,i) = sum(rrrcount_c2z(2,0:i)) - rrrcount_c2z(2,i)
+        end do
+
+        ssscount_z2c(:) = rrrcount_c2z(:)
+        rrrcount_z2c(:) = ssscount_c2z(:)
+
+        do i = 0, nprocs-1
+            sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
+            recvcount_c2z(i) = rrrcount_c2z(1,i)*rrrcount_c2z(2,i)
+            senddist_c2z(i) = sssdist_c2z(1,i)*sssdist_c2z(2,i)
+            recvdist_c2z(i) = rrrdist_c2z(1,i)*rrrdist_c2z(2,i)
         end do
 
         sendcount_z2c(:) = recvcount_c2z(:)
@@ -102,13 +121,38 @@ program main
         b(1:n12ssub,1:n3sub) =-2.d0
         c(1:n12ssub,1:n3sub) = 1.d0
         d(1:n12ssub,1:n3sub) = 0.d0
-        d_center(1:n1sub*n2sub,1:n3sub) = 1.d0
+
+        do k = 1, n3sub
+        do i = 1, n1sub*n2sub
+            d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
+        end do
+        end do
+        
 
         ! alltoall pack
+        count = 0
+        do index = 0, nprocs-1
+            do k = 1, ssscount_c2z(2,index)
+            do i = 1, ssscount_c2z(1,index)
+                packbuf_c2z(count) = d_center(sssdist_c2z(1,index)+ i, sssdist_c2z(2,index)+ k)
+                count = count+1
+            end do
+            end do
+        end do
+        write(*,*) "myrank=", myrank, packbuf_c2z
         
         ! alltoall c to z
 
         ! alltoall unpack
+        count = 0
+        do index = 0, nprocs-1
+            do k = 1, rrrcount_c2z(2,index)
+            do i = 1, rrrcount_c2z(1,index)
+                d(rrrdist_c2z(1,index)+ i, rrrdist_c2z(2,index)+ k) = unpackbuf_c2z(count) 
+                count = count+1
+            end do
+            end do
+        end do
 
         ! tdma many
         
@@ -118,7 +162,10 @@ program main
         
         ! alltoall unpack
         
-        
+        deallocate(ssscount_c2z, rrrcount_c2z)
+        deallocate(ssscount_z2c, rrrcount_z2c)
+        deallocate(sssdist_c2z, rrrdist_c2z)
+        deallocate(sssdist_z2c, rrrdist_z2c)
         deallocate(packbuf_c2z, unpackbuf_c2z)
         deallocate(packbuf_z2c, unpackbuf_z2c)
         deallocate(senddist_c2z, recvdist_c2z)
