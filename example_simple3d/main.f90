@@ -4,7 +4,7 @@ program main
     implicit none
 
     integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
-    integer, parameter :: np_dim(1:3) = (/1, 1, 4/)
+    integer, parameter :: np_dim(1:3) = (/1, 1, 8/)
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub
     real*8, allocatable, dimension(:,:,:) :: a,b,c,d
