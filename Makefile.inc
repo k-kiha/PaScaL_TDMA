@@ -1,5 +1,5 @@
 # Main compiler with MPI. Use mpiifort for intel MPI.
-FC = mpifort
+FC = mpiifort
 
 # Complie flag
 # For debugging
