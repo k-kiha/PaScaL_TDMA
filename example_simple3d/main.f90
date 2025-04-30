@@ -111,7 +111,7 @@ program main
         senddist_z2c(:) = recvdist_c2z(:)
         recvdist_z2c(:) = senddist_c2z(:)
 
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
+        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " senddist_c2z=", sendcount_c2z
 
         allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
         allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
@@ -122,45 +122,45 @@ program main
         c(1:n12ssub,1:n3sub) = 1.d0
         d(1:n12ssub,1:n3sub) = 0.d0
 
-        do k = 1, n3sub
-        do i = 1, n1sub*n2sub
-            d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
-        end do
-        end do
+        ! do k = 1, n3sub
+        ! do i = 1, n1sub*n2sub
+        !     d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
+        ! end do
+        ! end do
         
 
-        ! alltoall pack
-        count = 0
-        do index = 0, nprocs-1
-            do k = 1, ssscount_c2z(2,index)
-            do i = 1, ssscount_c2z(1,index)
-                packbuf_c2z(count) = d_center(sssdist_c2z(1,index)+ i, sssdist_c2z(2,index)+ k)
-                count = count+1
-            end do
-            end do
-        end do
-        write(*,*) "myrank=", myrank, packbuf_c2z
+        ! ! alltoall pack
+        ! count = 0
+        ! do index = 0, nprocs-1
+        !     do k = 1, ssscount_c2z(2,index)
+        !     do i = 1, ssscount_c2z(1,index)
+        !         packbuf_c2z(count) = d_center(sssdist_c2z(1,index)+ i, sssdist_c2z(2,index)+ k)
+        !         count = count+1
+        !     end do
+        !     end do
+        ! end do
+        ! write(*,*) "myrank=", myrank, packbuf_c2z
         
-        ! alltoall c to z
+        ! ! alltoall c to z
 
-        ! alltoall unpack
-        count = 0
-        do index = 0, nprocs-1
-            do k = 1, rrrcount_c2z(2,index)
-            do i = 1, rrrcount_c2z(1,index)
-                d(rrrdist_c2z(1,index)+ i, rrrdist_c2z(2,index)+ k) = unpackbuf_c2z(count) 
-                count = count+1
-            end do
-            end do
-        end do
+        ! ! alltoall unpack
+        ! count = 0
+        ! do index = 0, nprocs-1
+        !     do k = 1, rrrcount_c2z(2,index)
+        !     do i = 1, rrrcount_c2z(1,index)
+        !         d(rrrdist_c2z(1,index)+ i, rrrdist_c2z(2,index)+ k) = unpackbuf_c2z(count) 
+        !         count = count+1
+        !     end do
+        !     end do
+        ! end do
 
-        ! tdma many
+        ! ! tdma many
         
-        ! alltoall pack
+        ! ! alltoall pack
         
-        ! alltoall c to z
+        ! ! alltoall c to z
         
-        ! alltoall unpack
+        ! ! alltoall unpack
         
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
