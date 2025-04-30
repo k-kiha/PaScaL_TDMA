@@ -91,8 +91,8 @@ program main
 
         do i = 0, nprocs-1
             sssdist_c2z(1,i) = sum(ssscount_c2z(1,0:i)) - ssscount_c2z(1,i)
-            sssdist_c2z(2,i) = sum(ssscount_c2z(2,0:i)) - ssscount_c2z(2,i)
-            rrrdist_c2z(1,i) = sum(rrrcount_c2z(1,0:i)) - rrrcount_c2z(1,i)
+            sssdist_c2z(2,i) = 0
+            rrrdist_c2z(1,i) = 0
             rrrdist_c2z(2,i) = sum(rrrcount_c2z(2,0:i)) - rrrcount_c2z(2,i)
         end do
 
