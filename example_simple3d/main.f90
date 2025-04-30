@@ -7,7 +7,8 @@ program main
     integer, parameter :: np_dim(1:3) = (/1, 1, 8/)
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub
-    real*8, allocatable, dimension(:,:,:) :: a,b,c,d
+    real*8, allocatable, dimension(:,:) :: a,b,c,d
+    real*8, allocatable, dimension(:,:) :: d_center
     integer :: mpiutil_para
     real*8 :: timeA,timeB
 
@@ -26,19 +27,23 @@ program main
 
     write(*,*) "myrank=", myrank, " n1sub=", n1sub, " n2sub=", n2sub, " n3sub=", n3sub
 
+    !=====================
+    !=====================
     ![[ ==PaScaL_TDMA ====
-        allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
-        allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
+        allocate(a(1:n1sub*n2sub,1:n3sub), b(1:n1sub*n2sub,1:n3sub))
+        allocate(c(1:n1sub*n2sub,1:n3sub), d(1:n1sub*n2sub,1:n3sub))
 
-        a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-        b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
-        c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-        d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        a(1:n1sub*n2sub,1:n3sub) = 1.d0
+        b(1:n1sub*n2sub,1:n3sub) =-2.d0
+        c(1:n1sub*n2sub,1:n3sub) = 1.d0
+        d(1:n1sub*n2sub,1:n3sub) = 1.d0
 
         call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
+
         timeA = MPI_Wtime()
         call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
         timeB = MPI_Wtime()
+        
         call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
         deallocate(a, b, c, d)
@@ -46,6 +51,30 @@ program main
         write(*,*) "myrank=", myrank, " time=", timeB-timeA
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
     !==PaScaL_TDMA ==== ]]
+    !=====================
+    !=====================
+
+
+    !=======================
+    !=======================
+    ![[ ==Oridinal TDMA ====
+        ! allocate(d_center(1:n1sub,1:n2sub,1:n3sub))
+
+        ! allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
+        ! allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
+        ! a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        ! b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
+        ! c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        ! d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+
+
+        ! deallocate(a, b, c, d)
+
+        ! deallocate(d_center)
+        ! call MPI_Barrier(MPI_COMM_WORLD, ierr)
+    !==Oridinal TDMA ==== ]]
+    !=======================
+    !=======================
     call MPI_Finalize(ierr)
 
 end program
