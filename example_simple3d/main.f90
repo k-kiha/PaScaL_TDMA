@@ -13,6 +13,8 @@ program main
     integer :: i, j, k
     integer :: indx_tmpa, indx_tmpb
 
+    type(ptdma_plan_many) :: pz_many
+
     call MPI_Init(ierr)
     call MPI_Comm_size( MPI_COMM_WORLD, nprocs, ierr)
     call MPI_Comm_rank( MPI_COMM_WORLD, myrank, ierr)
@@ -26,7 +28,14 @@ program main
     allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
     allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
 
+    a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+    b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
+    c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+    d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
 
+    call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
+    call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
+    call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
     deallocate(a, b, c, d)
     call MPI_Finalize(ierr)
