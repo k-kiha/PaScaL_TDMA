@@ -1,6 +1,6 @@
 program main
     use mpi
-    ! use PaScaL_TDMA
+    use PaScaL_TDMA
     implicit none
     integer :: ierr, nprocs, myrank
 
