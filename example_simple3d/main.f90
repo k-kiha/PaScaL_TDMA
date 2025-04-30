@@ -3,7 +3,7 @@ program main
     use PaScaL_TDMA
     implicit none
 
-    integer, parameter :: n1 = 1024 ,n2 = 1024 ,n3 = 1024
+    integer, parameter :: n1 = 1024 ,n2 = 1024 ,n3 = 1025
     integer, parameter :: np_dim(1:3) = (/1, 1, 4/)
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub
