@@ -89,7 +89,7 @@ program main
         senddist_z2c(:) = senddist_c2z(:)
         recvdist_z2c(:) = recvdist_c2z(:)
 
-        write(*,*) "myrank=", myrank, " sendcount_c2z=", sendcount_z2c
+        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " sendcount_c2z=", sendcount_z2c
 
         a(1:n12ssub,1:n3sub) = 1.d0
         b(1:n12ssub,1:n3sub) =-2.d0
