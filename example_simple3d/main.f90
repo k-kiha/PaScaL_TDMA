@@ -129,7 +129,7 @@ program main
 
         do k = 1, n3sub
         do i = 1, n1sub*n2sub
-            d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
+            d_center(i,k) = i*(100) + k
         end do
         end do
         
