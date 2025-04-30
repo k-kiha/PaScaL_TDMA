@@ -6,7 +6,7 @@ program main
     integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
     integer, parameter :: np_dim(1:3) = (/1, 1, 8/)
     integer :: ierr, nprocs, myrank
-    integer :: n1sub,n2sub,n3sub
+    integer :: n1sub,n2sub,n3sub,n12ssub
     real*8, allocatable, dimension(:,:) :: a,b,c,d
     real*8, allocatable, dimension(:,:) :: d_center
     integer :: mpiutil_para
@@ -58,20 +58,36 @@ program main
     !=======================
     !=======================
     ![[ ==Oridinal TDMA ====
-        ! allocate(d_center(1:n1sub,1:n2sub,1:n3sub))
+        allocate(d_center(1:n1sub*n2sub,1:n3sub))
 
-        ! allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
-        ! allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
-        ! a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-        ! b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
-        ! c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-        ! d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        n12ssub = mpiutil_para(1, n1sub*n2sub, myrank, np_dim(3), indx_tmpa, indx_tmpb)
+        allocate(a(1:n12ssub,1:n3sub), b(1:n12ssub,1:n3sub))
+        allocate(c(1:n12ssub,1:n3sub), d(1:n12ssub,1:n3sub))
 
+        a(1:n12ssub,1:n3sub) = 1.d0
+        b(1:n12ssub,1:n3sub) =-2.d0
+        c(1:n12ssub,1:n3sub) = 1.d0
+        d(1:n12ssub,1:n3sub) = 0.d0
+        d_center(1:n1sub*n2sub,1:n3sub) = 1.d0
 
-        ! deallocate(a, b, c, d)
+        ! alltoall pack
+        
+        ! alltoall c to z
 
-        ! deallocate(d_center)
-        ! call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        ! alltoall unpack
+
+        ! tdma many
+        
+        ! alltoall pack
+        
+        ! alltoall c to z
+        
+        ! alltoall unpack
+
+        deallocate(a, b, c, d)
+
+        deallocate(d_center)
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
     !==Oridinal TDMA ==== ]]
     !=======================
     !=======================
