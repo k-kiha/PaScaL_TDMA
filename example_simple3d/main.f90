@@ -127,24 +127,24 @@ program main
         c(1:n12ssub,1:n3sub) = 1.d0
         d(1:n12ssub,1:n3sub) = 0.d0
 
-        ! do k = 1, n3sub
-        ! do i = 1, n1sub*n2sub
-        !     d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
-        ! end do
-        ! end do
+        do k = 1, n3sub
+        do i = 1, n1sub*n2sub
+            d_center(1:n1sub*n2sub,1:n3sub) = i*(100) + k
+        end do
+        end do
         
 
-        ! ! alltoall pack
-        ! count = 0
-        ! do index = 0, nprocs-1
-        !     do k = 1, ssscount_c2z(2,index)
-        !     do i = 1, ssscount_c2z(1,index)
-        !         packbuf_c2z(count) = d_center(sssdist_c2z(1,index)+ i, sssdist_c2z(2,index)+ k)
-        !         count = count+1
-        !     end do
-        !     end do
-        ! end do
-        ! write(*,*) "myrank=", myrank, packbuf_c2z
+        ! alltoall pack
+        count = 0
+        do index = 0, nprocs-1
+            do k = 1, ssscount_c2z(2,index)
+            do i = 1, ssscount_c2z(1,index)
+                packbuf_c2z(count) = d_center(sssdist_c2z(1,index)+ i, sssdist_c2z(2,index)+ k)
+                count = count+1
+            end do
+            end do
+        end do
+        write(*,*) "myrank=", myrank, packbuf_c2z
         
         ! ! alltoall c to z
 
