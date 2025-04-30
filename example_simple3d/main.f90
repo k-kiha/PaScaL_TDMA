@@ -144,7 +144,13 @@ program main
             end do
             end do
         end do
-        write(*,*) "myrank=", myrank, packbuf_c2z
+
+
+        do index = 0, nprocs-1
+            if(myrank==index) write(*,*) "myrank=", myrank, packbuf_c2z
+            call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        end do
+        
         
         ! ! alltoall c to z
 
