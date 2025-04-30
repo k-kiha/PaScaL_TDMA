@@ -102,8 +102,10 @@ program main
         do i = 0, nprocs-1
             sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
             recvcount_c2z(i) = rrrcount_c2z(1,i)*rrrcount_c2z(2,i)
-            senddist_c2z(i) = sssdist_c2z(1,i)*sssdist_c2z(2,i)
-            recvdist_c2z(i) = rrrdist_c2z(1,i)*rrrdist_c2z(2,i)
+        end do
+        do i = 0, nprocs-1
+            senddist_c2z(i) = sum(sendcount_c2z(0:i)) - sendcount_c2z(i)
+            recvdist_c2z(i) = sum(recvcount_c2z(0:i)) - recvcount_c2z(i)
         end do
 
         sendcount_z2c(:) = recvcount_c2z(:)
@@ -111,10 +113,10 @@ program main
         senddist_z2c(:) = recvdist_c2z(:)
         recvdist_z2c(:) = senddist_c2z(:)
 
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_z2c=", sendcount_z2c
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_z2c=", recvcount_z2c
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_z2c=", senddist_z2c
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_z2c=", recvdist_z2c
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_c2z=", sendcount_c2z
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_c2z=", recvcount_c2z
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_c2z=", recvdist_c2z
 
         allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
         allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
