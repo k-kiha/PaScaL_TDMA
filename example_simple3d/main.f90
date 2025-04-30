@@ -9,7 +9,7 @@ program main
     integer :: n1sub,n2sub,n3sub
     real*8, allocatable, dimension(:,:,:) :: a,b,c,d
     integer :: mpiutil_para
-    integer :: timeA,timeB
+    real*8 :: timeA,timeB
 
     integer :: i, j, k
     integer :: indx_tmpa, indx_tmpb
