@@ -20,6 +20,9 @@ program main
     integer, allocatable, dimension(:) :: sendcount_c2z, recvcount_c2z, senddist_c2z, recvdist_c2z
     integer, allocatable, dimension(:) :: sendcount_z2c, recvcount_z2c, senddist_z2c, recvdist_z2c
 
+    real*8, allocatable, dimension(:) :: packbuf_c2z, unpackbuf_c2z
+    real*8, allocatable, dimension(:) :: packbuf_z2c, unpackbuf_z2c
+
     call MPI_Init(ierr)
     call MPI_Comm_size( MPI_COMM_WORLD, nprocs, ierr)
     call MPI_Comm_rank( MPI_COMM_WORLD, myrank, ierr)
@@ -91,6 +94,10 @@ program main
 
         write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
 
+        allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
+        allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
+
+
         a(1:n12ssub,1:n3sub) = 1.d0
         b(1:n12ssub,1:n3sub) =-2.d0
         c(1:n12ssub,1:n3sub) = 1.d0
@@ -110,7 +117,10 @@ program main
         ! alltoall c to z
         
         ! alltoall unpack
-
+        
+        
+        deallocate(packbuf_c2z, unpackbuf_c2z)
+        deallocate(packbuf_z2c, unpackbuf_z2c)
         deallocate(senddist_c2z, recvdist_c2z)
         deallocate(senddist_z2c, recvdist_z2c)
         deallocate(sendcount_c2z, recvcount_c2z)
