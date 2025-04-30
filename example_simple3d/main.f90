@@ -111,10 +111,10 @@ program main
         senddist_z2c(:) = recvdist_c2z(:)
         recvdist_z2c(:) = senddist_c2z(:)
 
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " sendcount_z2c=", sendcount_z2c
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " recvcount_z2c=", recvcount_z2c
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " senddist_z2c=", senddist_z2c
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " recvdist_z2c=", recvdist_z2c
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_z2c=", sendcount_z2c
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_z2c=", recvcount_z2c
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_z2c=", senddist_z2c
+        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_z2c=", recvdist_z2c
 
         allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
         allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
