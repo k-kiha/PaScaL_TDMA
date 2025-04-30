@@ -9,6 +9,7 @@ program main
     integer :: n1sub,n2sub,n3sub
     real*8, allocatable, dimension(:,:,:) :: a,b,c,d
     integer :: mpiutil_para
+    integer :: timeA,timeB
 
     integer :: i, j, k
     integer :: indx_tmpa, indx_tmpb
@@ -35,10 +36,15 @@ program main
         d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
 
         call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
+        timeA = MPI_Wtime(ierr)
         call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
+        timeB = MPI_Wtime(ierr)
         call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
         deallocate(a, b, c, d)
+
+        write(*,*) "myrank=", myrank, " time=", timeB-timeA
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
     !==PaScaL_TDMA ==== ]]
     call MPI_Finalize(ierr)
 
