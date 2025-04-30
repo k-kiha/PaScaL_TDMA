@@ -3,7 +3,7 @@ program main
     use PaScaL_TDMA
     implicit none
 
-    integer, parameter :: n1 = 1024 ,n2 = 1024 ,n3 = 1025
+    integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
     integer, parameter :: np_dim(1:3) = (/1, 1, 4/)
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub
@@ -25,19 +25,21 @@ program main
 
     write(*,*) "myrank=", myrank, " n1sub=", n1sub, " n2sub=", n2sub, " n3sub=", n3sub
 
-    allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
-    allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
+    ![[ ==PaScaL_TDMA ====
+        allocate(a(1:n1sub,1:n2sub,1:n3sub), b(1:n1sub,1:n2sub,1:n3sub))
+        allocate(c(1:n1sub,1:n2sub,1:n3sub), d(1:n1sub,1:n2sub,1:n3sub))
 
-    a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-    b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
-    c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
-    d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        a(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        b(1:n1sub,1:n2sub,1:n3sub) =-2.d0
+        c(1:n1sub,1:n2sub,1:n3sub) = 1.d0
+        d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
 
-    call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
-    call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
-    call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
+        call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
+        call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
+        call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
-    deallocate(a, b, c, d)
+        deallocate(a, b, c, d)
+    !==PaScaL_TDMA ==== ]]
     call MPI_Finalize(ierr)
 
 end program
