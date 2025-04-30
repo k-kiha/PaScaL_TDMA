@@ -84,12 +84,12 @@ program main
             recvdist_c2z(i) = sum(sendcount_c2z(0:i)) - sendcount_c2z(i)
         end do
 
-        sendcount_z2c(:) = sendcount_c2z(:)
-        recvcount_z2c(:) = recvcount_c2z(:)
-        senddist_z2c(:) = senddist_c2z(:)
-        recvdist_z2c(:) = recvdist_c2z(:)
+        sendcount_z2c(:) = recvcount_c2z(:)
+        recvcount_z2c(:) = sendcount_c2z(:)
+        senddist_z2c(:) = recvdist_c2z(:)
+        recvdist_z2c(:) = senddist_c2z(:)
 
-        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " recvcount_c2z=", recvcount_c2z
+        write(*,'(1A,1I3,1A,4I3)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
 
         a(1:n12ssub,1:n3sub) = 1.d0
         b(1:n12ssub,1:n3sub) =-2.d0
