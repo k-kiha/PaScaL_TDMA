@@ -36,9 +36,9 @@ program main
         d(1:n1sub,1:n2sub,1:n3sub) = 1.d0
 
         call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
-        timeA = MPI_Wtime(ierr)
+        timeA = MPI_Wtime()
         call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
-        timeB = MPI_Wtime(ierr)
+        timeB = MPI_Wtime()
         call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
         deallocate(a, b, c, d)
