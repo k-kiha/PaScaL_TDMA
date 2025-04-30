@@ -1,2 +1,2 @@
-mpiifort -c -I../include  -L../lib -lpascal_tdma main.f90 
-mpiifort -I../include -L../lib -lpascal_tdma *.o
+mpiifort -c main.f90 -I../include 
+mpiifort *.o -I../include -L../lib -lpascal_tdma
