@@ -113,10 +113,10 @@ program main
         senddist_z2c(:) = recvdist_c2z(:)
         recvdist_z2c(:) = senddist_c2z(:)
 
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_c2z=", sendcount_c2z
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_c2z=", recvcount_c2z
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
-        write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_c2z=", recvdist_c2z
+        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_c2z=", sendcount_c2z
+        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_c2z=", recvcount_c2z
+        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
+        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_c2z=", recvdist_c2z
 
         allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
         allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
@@ -129,7 +129,7 @@ program main
 
         do k = 1, n3sub
         do i = 1, n1sub*n2sub
-            d_center(i,k) = i*(100) + k
+            d_center(i,k) = dble(i*(100) + k)
         end do
         end do
         
@@ -144,26 +144,25 @@ program main
             end do
             end do
         end do
+        
+        ! alltoall c to z
 
-
+        call MPI_Alltoallv(  packbuf_c2z, sendcount_c2z, senddist_c2z, MPI_DOUBLE, &
+                           unpackbuf_c2z, recvcount_c2z, recvdist_c2z, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
+        ! alltoall unpack
+        count = 0
         do index = 0, nprocs-1
-            if(myrank==index) write(*,*) "myrank=", myrank, packbuf_c2z
+            do k = 1, rrrcount_c2z(2,index)
+            do i = 1, rrrcount_c2z(1,index)
+                d(rrrdist_c2z(1,index)+ i, rrrdist_c2z(2,index)+ k) = unpackbuf_c2z(count) 
+                count = count+1
+            end do
+            end do
+        end do
+        do index = 0, nprocs-1
+            if(myrank==index) write(*,*) "myrank=", myrank, d(:,;)
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
         end do
-        
-        
-        ! ! alltoall c to z
-
-        ! ! alltoall unpack
-        ! count = 0
-        ! do index = 0, nprocs-1
-        !     do k = 1, rrrcount_c2z(2,index)
-        !     do i = 1, rrrcount_c2z(1,index)
-        !         d(rrrdist_c2z(1,index)+ i, rrrdist_c2z(2,index)+ k) = unpackbuf_c2z(count) 
-        !         count = count+1
-        !     end do
-        !     end do
-        ! end do
 
         ! ! tdma many
         
