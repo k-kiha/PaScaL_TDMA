@@ -212,7 +212,13 @@ program main
         timeB = MPI_Wtime()
         if ( myrank == 0 ) then
             write(*,*) "myrank=", myrank, " time=", timeB-timeA
-            write(*,'(1A13,1A1,F30.20)') "time",":",timeB - timeA
+            write(*,'(1A13,1A1,F30.20)') "time",":", (timeB_pack1 - timeA_pack1)    &
+                                                    +(timeB_unpack1 - timeA_unpack1)&
+                                                    +(timeB_comm1 - timeA_comm1)    &
+                                                    +(timeB_tdma - timeA_tdma)      &
+                                                    +(timeB_pack2 - timeA_pack2)    &
+                                                    +(timeB_unpack2 - timeA_unpack2)&
+                                                    +(timeB_comm2 - timeA_comm2)
             write(*,'(1A13,1A1,F30.20)') "time_pack1",":",timeB_pack1 - timeA_pack1
             write(*,'(1A13,1A1,F30.20)') "time_unpack1",":",timeB_unpack1 - timeA_unpack1
             write(*,'(1A13,1A1,F30.20)') "time_comm1",":",timeB_comm1 - timeA_comm1
