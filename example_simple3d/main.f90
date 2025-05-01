@@ -160,7 +160,7 @@ program main
             end do
         end do
         do index = 0, nprocs-1
-            if(myrank==index) write(*,*) "myrank=", myrank, d(:,;)
+            if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
         end do
 
