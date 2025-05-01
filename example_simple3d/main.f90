@@ -135,7 +135,7 @@ program main
         end do
         end do
         
-
+        timeA = MPI_Wtime()
         ! alltoall pack
         count = 0
         do index = 0, nprocs-1
@@ -189,6 +189,10 @@ program main
             end do
             end do
         end do
+        
+        timeB = MPI_Wtime()
+        write(*,*) "myrank=", myrank, " time=", timeB-timeA
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
