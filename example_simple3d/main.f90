@@ -146,10 +146,15 @@ program main
         end do
         
         ! alltoall c to z
-
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "111"; 
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         call MPI_Alltoallv(  packbuf_c2z, sendcount_c2z, senddist_c2z, MPI_DOUBLE, &
                            unpackbuf_c2z, recvcount_c2z, recvdist_c2z, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
         ! alltoall unpack
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "222"; 
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         count = 0
         do index = 0, nprocs-1
             do k = 1, rrrcount_c2z(2,index)
@@ -159,10 +164,16 @@ program main
             end do
             end do
         end do
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "333"; 
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         do index = 0, nprocs-1
             if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
         end do
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "444"; 
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
 
         ! ! tdma many
         
