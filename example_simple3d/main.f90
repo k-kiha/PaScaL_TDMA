@@ -160,18 +160,11 @@ program main
             end do
             end do
         end do
-        ! do index = 0, nprocs-1
-        !     if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
-        !     call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        ! end do
 
         ! tdma many
-        d_center        =0.d0
+        call tdma_many(plan%A_rt,plan%B_rt,plan%C_rt,plan%D_rt, plan%n_sys_rt, plan%n_row_rt)
 
         ! alltoall pack
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "111"
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         count = 0
         do index = 0, nprocs-1
             do k = 1, ssscount_z2c(2,index)
@@ -181,17 +174,11 @@ program main
             end do
             end do
         end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "222",myrank
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         ! alltoall c to z
         call MPI_Alltoallv(  packbuf_z2c, sendcount_z2c, senddist_z2c, MPI_DOUBLE, &
                            unpackbuf_z2c, recvcount_z2c, recvdist_z2c, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
         
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "333"
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         ! alltoall unpack
         count = 0
         do index = 0, nprocs-1
@@ -202,16 +189,6 @@ program main
             end do
             end do
         end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "444"
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        do index = 0, nprocs-1
-            if(myrank==index) write(*,*) "myrank=", myrank, d_center(:,:)
-            call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "555"
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
@@ -235,7 +212,40 @@ program main
 
 end program
 
+! subroutine tdma_many(a, b, c, d, n1, n2)
 
+!     implicit none
+
+!     integer, intent(in) :: n1,n2
+!     double precision, intent(inout) :: a(n1,n2), b(n1,n2), c(n1,n2), d(n1,n2)
+    
+!     integer :: i,j
+!     double precision, allocatable, dimension(:) :: r
+
+!     allocate(r(1:n1))
+
+!     do i=1,n1
+!         d(i,1)=d(i,1)/b(i,1)
+!         c(i,1)=c(i,1)/b(i,1)
+!     enddo
+
+!     do j=2,n2
+!         do i=1,n1
+!             r(i)=1.d0/(b(i,j)-a(i,j)*c(i,j-1))
+!             d(i,j)=r(i)*(d(i,j)-a(i,j)*d(i,j-1))
+!             c(i,j)=r(i)*c(i,j)
+!         enddo
+!     enddo
+
+!     do j=n2-1,1,-1
+!         do i=1,n1
+!             d(i,j)=d(i,j)-c(i,j)*d(i,j+1)
+!         enddo
+!     enddo
+
+!     deallocate(r)
+
+! end subroutine tdma_many
 
 function mpiutil_para(sta_g, end_g, myrank, nprocs, indx_a, indx_b)result(nsub)
     integer :: sta_g, end_g, myrank, nprocs, indx_a, indx_b
