@@ -146,15 +146,9 @@ program main
         end do
         
         ! alltoall c to z
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "111"; 
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         call MPI_Alltoallv(  packbuf_c2z, sendcount_c2z, senddist_c2z, MPI_DOUBLE, &
                            unpackbuf_c2z, recvcount_c2z, recvdist_c2z, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
         ! alltoall unpack
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "222"; 
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         count = 0
         do index = 0, nprocs-1
             do k = 1, rrrcount_c2z(2,index)
@@ -164,24 +158,43 @@ program main
             end do
             end do
         end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "333"; 
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         do index = 0, nprocs-1
             if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
         end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "444"; 
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
 
-        ! ! tdma many
+        ! tdma many
+        d_center        =0.d0
         
-        ! ! alltoall pack
+        ! alltoall pack
+        count = 0
+        do index = 0, nprocs-1
+            do k = 1, ssscount_z2c(2,index)
+            do i = 1, ssscount_z2c(1,index)
+                packbuf_z2c(count) = d(sssdist_z2c(1,index)+ i, sssdist_z2c(2,index)+ k)
+                count = count+1
+            end do
+            end do
+        end do
         
-        ! ! alltoall c to z
+        ! alltoall c to z
+        call MPI_Alltoallv(  packbuf_z2c, sendcount_z2c, senddist_z2c, MPI_DOUBLE, &
+                           unpackbuf_z2c, recvcount_z2c, recvdist_z2c, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
         
-        ! ! alltoall unpack
+        ! alltoall unpack
+        count = 0
+        do index = 0, nprocs-1
+            do k = 1, rrrcount_z2c(2,index)
+            do i = 1, rrrcount_z2c(1,index)
+                d_center(rrrdist_z2c(1,index)+ i, rrrdist_z2c(2,index)+ k) = unpackbuf_z2c(count) 
+                count = count+1
+            end do
+            end do
+        end do
+        do index = 0, nprocs-1
+            if(myrank==index) write(*,*) "myrank=", myrank, d_center(:,:)
+            call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        end do
         
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
