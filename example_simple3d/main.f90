@@ -3,14 +3,16 @@ program main
     use PaScaL_TDMA
     implicit none
 
-    integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
-    ! integer, parameter :: np_dim(1:3) = (/1, 1, 8/)
+    ! integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
+    integer :: n1 ,n2 ,n3
+
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub,n12ssub
     real*8, allocatable, dimension(:,:) :: a,b,c,d
     real*8, allocatable, dimension(:,:) :: d_center
     integer :: mpiutil_para
     real*8 :: timeA,timeB
+    real*8 :: timeA0,timeB0
     real*8 :: timeA_pack1,timeB_pack1
     real*8 :: timeA_unpack1,timeB_unpack1
     real*8 :: timeA_comm1,timeB_comm1
@@ -23,6 +25,8 @@ program main
     integer :: indx_tmpa, indx_tmpb
 
     type(ptdma_plan_many) :: pz_many
+    
+    integer :: ios
 
     integer, allocatable, dimension(:,:) :: ssscount_c2z, rrrcount_c2z, sssdist_c2z, rrrdist_c2z
     integer, allocatable, dimension(:,:) :: ssscount_z2c, rrrcount_z2c, sssdist_z2c, rrrdist_z2c
@@ -36,6 +40,13 @@ program main
     call MPI_Init(ierr)
     call MPI_Comm_size( MPI_COMM_WORLD, nprocs, ierr)
     call MPI_Comm_rank( MPI_COMM_WORLD, myrank, ierr)
+    ! Read values from the input file "in.in"
+    
+    open(unit=10, file="in.in", status="old", action="read", iostat=ios)
+    read(10,*) n1
+    read(10,*) n2
+    read(10,*) n3
+    close(10)
 
     n1sub = n1
     n2sub = n2
@@ -56,15 +67,15 @@ program main
 
         call PaScaL_TDMA_plan_many_create(pz_many, (n1sub*n2sub), myrank, nprocs, MPI_COMM_WORLD)
 
-        timeA = MPI_Wtime()
+        timeA0 = MPI_Wtime()
         call PaScaL_TDMA_many_solve(pz_many, a,b,c,d,(n1sub*n2sub),n3sub)
-        timeB = MPI_Wtime()
+        timeB0 = MPI_Wtime()
         
         call PaScaL_TDMA_plan_many_destroy(pz_many,nprocs)
 
         deallocate(a, b, c, d)
 
-        if ( myrank == 0 ) write(*,*) "myrank=", myrank, " time=", timeB-timeA
+        if ( myrank == 0 ) write(*,*) "myrank=", myrank, " time=", timeB0-timeA0
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
     !==PaScaL_TDMA ==== ]]
     !=====================
@@ -228,6 +239,19 @@ program main
             write(*,'(1A13,1A1,F30.20)') "time_comm2",":",timeB_comm2 - timeA_comm2
         end if
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
+
+        if ( myrank == 0 ) then
+            write(*,'(4I15,9E30.20)') n1sub,n2sub,n3,n3sub   &
+            timeB0-timeA0                   &
+            ,timeB-timeA                    &
+            ,timeB_pack1 - timeA_pack1      &
+            ,timeB_unpack1 - timeA_unpack1  &
+            ,timeB_comm1 - timeA_comm1      &
+            ,timeB_tdma - timeA_tdma        &
+            ,timeB_pack2 - timeA_pack2      &
+            ,timeB_unpack2 - timeA_unpack2  &
+            ,timeB_comm2 - timeA_comm2
+        end if
         
         !~~~ alltoall info ~~~~
             deallocate(ssscount_c2z, rrrcount_c2z)
