@@ -158,15 +158,18 @@ program main
             end do
             end do
         end do
-        do index = 0, nprocs-1
-            if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
-            call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        end do
+        ! do index = 0, nprocs-1
+        !     if(myrank==index) write(*,*) "myrank=", myrank, d(:,:)
+        !     call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        ! end do
 
         ! tdma many
         d_center        =0.d0
-        
+
         ! alltoall pack
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "111"
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         count = 0
         do index = 0, nprocs-1
             do k = 1, ssscount_z2c(2,index)
@@ -176,11 +179,17 @@ program main
             end do
             end do
         end do
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "222"
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         ! alltoall c to z
         call MPI_Alltoallv(  packbuf_z2c, sendcount_z2c, senddist_z2c, MPI_DOUBLE, &
                            unpackbuf_z2c, recvcount_z2c, recvdist_z2c, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
         
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "333"
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         ! alltoall unpack
         count = 0
         do index = 0, nprocs-1
@@ -191,10 +200,16 @@ program main
             end do
             end do
         end do
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "444"
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         do index = 0, nprocs-1
             if(myrank==index) write(*,*) "myrank=", myrank, d_center(:,:)
             call MPI_Barrier(MPI_COMM_WORLD, ierr)
         end do
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "555"
+        call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
