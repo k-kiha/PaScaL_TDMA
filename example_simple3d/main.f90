@@ -98,6 +98,8 @@ program main
 
         ssscount_z2c(:,:) = rrrcount_c2z(:,:)
         rrrcount_z2c(:,:) = ssscount_c2z(:,:)
+        sssdist_z2c(:,:) = rrrdist_c2z(:,:)
+        rrrdist_z2c(:,:) = sssdist_c2z(:,:)
 
         do i = 0, nprocs-1
             sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
@@ -174,7 +176,7 @@ program main
         do index = 0, nprocs-1
             do k = 1, ssscount_z2c(2,index)
             do i = 1, ssscount_z2c(1,index)
-                packbuf_z2c(count) = 111!d(sssdist_z2c(1,index)+ i, sssdist_z2c(2,index)+ k)
+                packbuf_z2c(count) = d(sssdist_z2c(1,index)+ i, sssdist_z2c(2,index)+ k)
                 count = count+1
             end do
             end do
