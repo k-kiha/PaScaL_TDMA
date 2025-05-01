@@ -241,7 +241,8 @@ program main
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
 
         if ( myrank == 0 ) then
-            write(*,'(5I15,9E30.20)') nprocs,n1sub,n2sub,n3,n3sub   &
+            open(unit=20, file="out.txt", status="unknown", position="append", action="write", iostat=unit)
+            write(20,'(5I15,9E30.20)') nprocs,n1sub,n2sub,n3,n3sub   &
             ,timeB0-timeA0                  &
             ,timeB-timeA                    &
             ,timeB_pack1 - timeA_pack1      &
@@ -251,6 +252,7 @@ program main
             ,timeB_pack2 - timeA_pack2      &
             ,timeB_unpack2 - timeA_unpack2  &
             ,timeB_comm2 - timeA_comm2
+            close(20)
         end if
         
         !~~~ alltoall info ~~~~
