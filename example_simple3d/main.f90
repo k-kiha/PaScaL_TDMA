@@ -162,7 +162,7 @@ program main
         end do
 
         ! tdma many
-        call tdma_many(plan%A_rt,plan%B_rt,plan%C_rt,plan%D_rt, plan%n_sys_rt, plan%n_row_rt)
+        call tdma_many(A,B,C,D, n12ssub, n3)
 
         ! alltoall pack
         count = 0
