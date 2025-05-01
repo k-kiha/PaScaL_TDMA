@@ -70,8 +70,8 @@ program main
         allocate(d_center(1:n1sub*n2sub,1:n3sub))
 
         n12ssub = mpiutil_para(1, n1sub*n2sub, myrank, nprocs, indx_tmpa, indx_tmpb)
-        allocate(a(1:n12ssub,1:n3sub), b(1:n12ssub,1:n3sub))
-        allocate(c(1:n12ssub,1:n3sub), d(1:n12ssub,1:n3sub))
+        allocate(a(1:n12ssub,1:n3), b(1:n12ssub,1:n3))
+        allocate(c(1:n12ssub,1:n3), d(1:n12ssub,1:n3))
 
         allocate(ssscount_c2z(1:2,0:nprocs-1), rrrcount_c2z(1:2,0:nprocs-1))
         allocate(ssscount_z2c(1:2,0:nprocs-1), rrrcount_z2c(1:2,0:nprocs-1))
