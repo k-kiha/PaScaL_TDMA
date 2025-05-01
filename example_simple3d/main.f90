@@ -3,7 +3,7 @@ program main
     use PaScaL_TDMA
     implicit none
 
-    integer, parameter :: n1 = 3 ,n2 = 3 ,n3 = 15
+    integer, parameter :: n1 = 256 ,n2 = 256 ,n3 = 1024
     ! integer, parameter :: np_dim(1:3) = (/1, 1, 8/)
     integer :: ierr, nprocs, myrank
     integer :: n1sub,n2sub,n3sub,n12ssub
@@ -63,6 +63,7 @@ program main
     !=====================
     !=====================
 
+    write(*,*) "~~~~~~~~~~~"
 
     !=======================
     !=======================
@@ -193,7 +194,7 @@ program main
         timeB = MPI_Wtime()
         write(*,*) "myrank=", myrank, " time=", timeB-timeA
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        
+
         deallocate(ssscount_c2z, rrrcount_c2z)
         deallocate(ssscount_z2c, rrrcount_z2c)
         deallocate(sssdist_c2z, rrrdist_c2z)
