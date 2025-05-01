@@ -241,7 +241,7 @@ program main
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
 
         if ( myrank == 0 ) then
-            open(unit=20, file="out.txt", status="unknown", position="append", action="write", iostat=unit)
+            open(unit=20, file="out.txt", status="unknown", position="append", action="write"
             write(20,'(5I15,9E30.20)') nprocs,n1sub,n2sub,n3,n3sub   &
             ,timeB0-timeA0                  &
             ,timeB-timeA                    &
