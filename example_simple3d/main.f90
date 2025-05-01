@@ -27,7 +27,7 @@ program main
     type(ptdma_plan_many) :: pz_many
     
     integer :: ios
-
+    character*8 :: tmpchar
     integer, allocatable, dimension(:,:) :: ssscount_c2z, rrrcount_c2z, sssdist_c2z, rrrdist_c2z
     integer, allocatable, dimension(:,:) :: ssscount_z2c, rrrcount_z2c, sssdist_z2c, rrrdist_z2c
 
@@ -43,9 +43,9 @@ program main
     ! Read values from the input file "in.in"
     
     open(unit=10, file="in.in", status="old", action="read", iostat=ios)
-    read(10,*) n1
-    read(10,*) n2
-    read(10,*) n3
+    read(10,*) tmpchar, n1
+    read(10,*) tmpchar, n2
+    read(10,*) tmpchar, n3
     close(10)
 
     n1sub = n1
