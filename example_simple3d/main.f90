@@ -241,7 +241,7 @@ program main
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
 
         if ( myrank == 0 ) then
-            write(*,'(4I15,9E30.20)') n1sub,n2sub,n3,n3sub   &
+            write(*,'(5I15,9E30.20)') nprocs,n1sub,n2sub,n3,n3sub   &
             ,timeB0-timeA0                  &
             ,timeB-timeA                    &
             ,timeB_pack1 - timeA_pack1      &
