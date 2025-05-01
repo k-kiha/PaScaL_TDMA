@@ -174,7 +174,7 @@ program main
         do index = 0, nprocs-1
             do k = 1, ssscount_z2c(2,index)
             do i = 1, ssscount_z2c(1,index)
-                packbuf_z2c(count) = d(sssdist_z2c(1,index)+ i, sssdist_z2c(2,index)+ k)
+                packbuf_z2c(count) = 111!d(sssdist_z2c(1,index)+ i, sssdist_z2c(2,index)+ k)
                 count = count+1
             end do
             end do
