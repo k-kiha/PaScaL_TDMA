@@ -11,6 +11,13 @@ program main
     real*8, allocatable, dimension(:,:) :: d_center
     integer :: mpiutil_para
     real*8 :: timeA,timeB
+    real*8 :: timeA_pack1,timeB_pack1
+    real*8 :: timeA_unpack1,timeB_unpack1
+    real*8 :: timeA_comm1,timeB_comm1
+    real*8 :: timeA_tdma,timeB_tdma
+    real*8 :: timeA_pack2,timeB_pack2
+    real*8 :: timeA_unpack2,timeB_unpack2
+    real*8 :: timeA_comm2,timeB_comm2
 
     integer :: i, j, k, index, count
     integer :: indx_tmpa, indx_tmpb
@@ -57,13 +64,13 @@ program main
 
         deallocate(a, b, c, d)
 
-        write(*,*) "myrank=", myrank, " time=", timeB-timeA
+        if ( myrank == 0 ) write(*,*) "myrank=", myrank, " time=", timeB-timeA
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
     !==PaScaL_TDMA ==== ]]
     !=====================
     !=====================
 
-    write(*,*) "~~~~~~~~~~~"
+    if ( myrank == 0 ) write(*,*) "~~~~~~~~~~~"
 
     !=======================
     !=======================
@@ -74,56 +81,53 @@ program main
         allocate(a(1:n12ssub,1:n3), b(1:n12ssub,1:n3))
         allocate(c(1:n12ssub,1:n3), d(1:n12ssub,1:n3))
 
-        allocate(ssscount_c2z(1:2,0:nprocs-1), rrrcount_c2z(1:2,0:nprocs-1))
-        allocate(ssscount_z2c(1:2,0:nprocs-1), rrrcount_z2c(1:2,0:nprocs-1))
-        allocate(sssdist_c2z(1:2,0:nprocs-1), rrrdist_c2z(1:2,0:nprocs-1))
-        allocate(sssdist_z2c(1:2,0:nprocs-1), rrrdist_z2c(1:2,0:nprocs-1))
-        allocate(sendcount_c2z(0:nprocs-1), recvcount_c2z(0:nprocs-1))
-        allocate(sendcount_z2c(0:nprocs-1), recvcount_z2c(0:nprocs-1))
-        allocate(senddist_c2z(0:nprocs-1), recvdist_c2z(0:nprocs-1))
-        allocate(senddist_z2c(0:nprocs-1), recvdist_z2c(0:nprocs-1))
+        !~~~ alltoall info ~~~~
+            allocate(ssscount_c2z(1:2,0:nprocs-1), rrrcount_c2z(1:2,0:nprocs-1))
+            allocate(ssscount_z2c(1:2,0:nprocs-1), rrrcount_z2c(1:2,0:nprocs-1))
+            allocate(sssdist_c2z(1:2,0:nprocs-1), rrrdist_c2z(1:2,0:nprocs-1))
+            allocate(sssdist_z2c(1:2,0:nprocs-1), rrrdist_z2c(1:2,0:nprocs-1))
+            allocate(sendcount_c2z(0:nprocs-1), recvcount_c2z(0:nprocs-1))
+            allocate(sendcount_z2c(0:nprocs-1), recvcount_z2c(0:nprocs-1))
+            allocate(senddist_c2z(0:nprocs-1), recvdist_c2z(0:nprocs-1))
+            allocate(senddist_z2c(0:nprocs-1), recvdist_z2c(0:nprocs-1))
 
-        do i = 0, nprocs-1
-            ssscount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), i     , nprocs, indx_tmpa, indx_tmpb)
-            ssscount_c2z(2,i) = n3sub
-            rrrcount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), myrank, nprocs, indx_tmpa, indx_tmpb)
-            rrrcount_c2z(2,i) = mpiutil_para(1, n3           , i     , nprocs, indx_tmpa, indx_tmpb)
-        end do
+            do i = 0, nprocs-1
+                ssscount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), i     , nprocs, indx_tmpa, indx_tmpb)
+                ssscount_c2z(2,i) = n3sub
+                rrrcount_c2z(1,i) = mpiutil_para(1, (n1sub*n2sub), myrank, nprocs, indx_tmpa, indx_tmpb)
+                rrrcount_c2z(2,i) = mpiutil_para(1, n3           , i     , nprocs, indx_tmpa, indx_tmpb)
+            end do
 
-        do i = 0, nprocs-1
-            sssdist_c2z(1,i) = sum(ssscount_c2z(1,0:i)) - ssscount_c2z(1,i)
-            sssdist_c2z(2,i) = 0
-            rrrdist_c2z(1,i) = 0
-            rrrdist_c2z(2,i) = sum(rrrcount_c2z(2,0:i)) - rrrcount_c2z(2,i)
-        end do
+            do i = 0, nprocs-1
+                sssdist_c2z(1,i) = sum(ssscount_c2z(1,0:i)) - ssscount_c2z(1,i)
+                sssdist_c2z(2,i) = 0
+                rrrdist_c2z(1,i) = 0
+                rrrdist_c2z(2,i) = sum(rrrcount_c2z(2,0:i)) - rrrcount_c2z(2,i)
+            end do
 
-        ssscount_z2c(:,:) = rrrcount_c2z(:,:)
-        rrrcount_z2c(:,:) = ssscount_c2z(:,:)
-        sssdist_z2c(:,:) = rrrdist_c2z(:,:)
-        rrrdist_z2c(:,:) = sssdist_c2z(:,:)
+            ssscount_z2c(:,:) = rrrcount_c2z(:,:)
+            rrrcount_z2c(:,:) = ssscount_c2z(:,:)
+            sssdist_z2c(:,:) = rrrdist_c2z(:,:)
+            rrrdist_z2c(:,:) = sssdist_c2z(:,:)
 
-        do i = 0, nprocs-1
-            sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
-            recvcount_c2z(i) = rrrcount_c2z(1,i)*rrrcount_c2z(2,i)
-        end do
-        do i = 0, nprocs-1
-            senddist_c2z(i) = sum(sendcount_c2z(0:i)) - sendcount_c2z(i)
-            recvdist_c2z(i) = sum(recvcount_c2z(0:i)) - recvcount_c2z(i)
-        end do
+            do i = 0, nprocs-1
+                sendcount_c2z(i) = ssscount_c2z(1,i)*ssscount_c2z(2,i)
+                recvcount_c2z(i) = rrrcount_c2z(1,i)*rrrcount_c2z(2,i)
+            end do
+            do i = 0, nprocs-1
+                senddist_c2z(i) = sum(sendcount_c2z(0:i)) - sendcount_c2z(i)
+                recvdist_c2z(i) = sum(recvcount_c2z(0:i)) - recvcount_c2z(i)
+            end do
 
-        sendcount_z2c(:) = recvcount_c2z(:)
-        recvcount_z2c(:) = sendcount_c2z(:)
-        senddist_z2c(:) = recvdist_c2z(:)
-        recvdist_z2c(:) = senddist_c2z(:)
+            sendcount_z2c(:) = recvcount_c2z(:)
+            recvcount_z2c(:) = sendcount_c2z(:)
+            senddist_z2c(:) = recvdist_c2z(:)
+            recvdist_z2c(:) = senddist_c2z(:)
 
-        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " sendcount_c2z=", sendcount_c2z
-        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvcount_c2z=", recvcount_c2z
-        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " senddist_c2z=", senddist_c2z
-        ! write(*,'(1A,1I3,1A,4I5)') "myrank=", myrank, " recvdist_c2z=", recvdist_c2z
+            allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
+            allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
 
-        allocate(packbuf_c2z(0:sum(sendcount_c2z(:))-1), unpackbuf_c2z(0:sum(recvcount_c2z(:))-1))
-        allocate(packbuf_z2c(0:sum(sendcount_z2c(:))-1), unpackbuf_z2c(0:sum(recvcount_z2c(:))-1))
-
+        !~~~ alltoall info ~~~~
 
         a(1:n12ssub,1:n3sub) = 1.d0
         b(1:n12ssub,1:n3sub) =-2.d0
@@ -138,6 +142,7 @@ program main
         
         timeA = MPI_Wtime()
         ! alltoall pack
+        timeA_pack1     = MPI_Wtime()
         count = 0
         do index = 0, nprocs-1
             do k = 1, ssscount_c2z(2,index)
@@ -147,11 +152,15 @@ program main
             end do
             end do
         end do
+        timeB_pack1     = MPI_Wtime()
         
         ! alltoall c to z
+        timeA_comm1     = MPI_Wtime()
         call MPI_Alltoallv(  packbuf_c2z, sendcount_c2z, senddist_c2z, MPI_DOUBLE, &
                            unpackbuf_c2z, recvcount_c2z, recvdist_c2z, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
+        timeB_comm1     = MPI_Wtime()
         ! alltoall unpack
+        timeA_unpack1   = MPI_Wtime()
         count = 0
         do index = 0, nprocs-1
             do k = 1, rrrcount_c2z(2,index)
@@ -161,11 +170,15 @@ program main
             end do
             end do
         end do
+        timeB_unpack1   = MPI_Wtime()
 
         ! tdma many
+        timeA_tdma      = MPI_Wtime()
         call tdma_many(A,B,C,D, n12ssub, n3)
+        timeB_tdma      = MPI_Wtime()
 
         ! alltoall pack
+        timeA_pack2     = MPI_Wtime()
         count = 0
         do index = 0, nprocs-1
             do k = 1, ssscount_z2c(2,index)
@@ -175,12 +188,16 @@ program main
             end do
             end do
         end do
+        timeB_pack2     = MPI_Wtime()
         
         ! alltoall c to z
+        timeA_comm2     = MPI_Wtime()
         call MPI_Alltoallv(  packbuf_z2c, sendcount_z2c, senddist_z2c, MPI_DOUBLE, &
                            unpackbuf_z2c, recvcount_z2c, recvdist_z2c, MPI_DOUBLE, MPI_COMM_WORLD, ierr)
+        timeB_comm2     = MPI_Wtime()
         
         ! alltoall unpack
+        timeA_unpack2   = MPI_Wtime()
         count = 0
         do index = 0, nprocs-1
             do k = 1, rrrcount_z2c(2,index)
@@ -190,21 +207,34 @@ program main
             end do
             end do
         end do
+        timeB_unpack2   = MPI_Wtime()
         
         timeB = MPI_Wtime()
-        write(*,*) "myrank=", myrank, " time=", timeB-timeA
+        if ( myrank == 0 ) then
+            write(*,*) "myrank=", myrank, " time=", timeB-timeA
+            write(*,*) "time",timeB - timeA
+            write(*,*) "time_pack1",timeB_pack1 - timeA_pack1
+            write(*,*) "time_unpack1",timeB_unpack1 - timeA_unpack1
+            write(*,*) "time_comm1",timeB_comm1 - timeA_comm1
+            write(*,*) "time_tdma",timeB_tdma - timeA_tdma
+            write(*,*) "time_pack2",timeB_pack2 - timeA_pack2
+            write(*,*) "time_unpack2",timeB_unpack2 - timeA_unpack2
+            write(*,*) "time_comm2",timeB_comm2 - timeA_comm2
+        end if
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
-
-        deallocate(ssscount_c2z, rrrcount_c2z)
-        deallocate(ssscount_z2c, rrrcount_z2c)
-        deallocate(sssdist_c2z, rrrdist_c2z)
-        deallocate(sssdist_z2c, rrrdist_z2c)
-        deallocate(packbuf_c2z, unpackbuf_c2z)
-        deallocate(packbuf_z2c, unpackbuf_z2c)
-        deallocate(senddist_c2z, recvdist_c2z)
-        deallocate(senddist_z2c, recvdist_z2c)
-        deallocate(sendcount_c2z, recvcount_c2z)
-        deallocate(sendcount_z2c, recvcount_z2c)
+        
+        !~~~ alltoall info ~~~~
+            deallocate(ssscount_c2z, rrrcount_c2z)
+            deallocate(ssscount_z2c, rrrcount_z2c)
+            deallocate(sssdist_c2z, rrrdist_c2z)
+            deallocate(sssdist_z2c, rrrdist_z2c)
+            deallocate(packbuf_c2z, unpackbuf_c2z)
+            deallocate(packbuf_z2c, unpackbuf_z2c)
+            deallocate(senddist_c2z, recvdist_c2z)
+            deallocate(senddist_z2c, recvdist_z2c)
+            deallocate(sendcount_c2z, recvcount_c2z)
+            deallocate(sendcount_z2c, recvcount_z2c)
+        !~~~ alltoall info ~~~~
 
         deallocate(a, b, c, d)
 
