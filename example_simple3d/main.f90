@@ -179,8 +179,8 @@ program main
             end do
             end do
         end do
-        call MPI_Barrier(MPI_COMM_WORLD, ierr)
-        write(*,*) "222"
+        ! call MPI_Barrier(MPI_COMM_WORLD, ierr)
+        write(*,*) "222",myrank
         call MPI_Barrier(MPI_COMM_WORLD, ierr)
         
         ! alltoall c to z
